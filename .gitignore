@@ -5,3 +5,4 @@ vocab.txt
 *.h5
 *.rar
 ch03/unet_model.npz
+TLXZoo/
