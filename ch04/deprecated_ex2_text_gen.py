@@ -1,4 +1,4 @@
-# Still testing, not working yet
+# Deprecated, because it use Tensorflow
 
 
 # Char-level text generation with LSTM
@@ -7,7 +7,7 @@ os.environ['TL_BACKEND'] = 'torch'
 
 from tensorlayerx.nn.layers import Embedding, LSTM, Linear
 from tensorlayerx.utils import iterate
-from tensorlayerx.text import nlp
+from tensorlayerx.text import nlp #This requires tensorflow
 import tensorlayerx as tlx
 import nltk
 import numpy as np

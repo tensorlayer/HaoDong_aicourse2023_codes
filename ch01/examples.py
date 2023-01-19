@@ -121,18 +121,18 @@ print("Loss MSE by TLX: {}".format(l_mse_tlx.numpy()))
 target_binary = tlx.convert_to_tensor([[1., 0.]])
 
 print("Target value:{}".format(target_binary.numpy()))
-print("Neural network output:{}".format(out.numpy()))
+print("Neural network output:{}".format(out.detach().numpy()))
 
 # Binary cross entropy
 l_bce = tlx.losses.binary_cross_entropy(out, target_binary)
-print("Loss binary cross entropy:{}".format(l_bce.numpy()))
+print("Loss binary cross entropy:{}".format(l_bce.detach().numpy()))
 
 
 # Error Back-Propagation
 # Example
-x = tlx.convert_to_tensor(1.)
+x = tlx.Variable(tlx.convert_to_tensor(1.))
 x.stop_gradient = False
-w = tlx.convert_to_tensor(0.5)
+w = tlx.Variable(tlx.convert_to_tensor(0.5))
 w.stop_gradient = False
 
 t = x+w
@@ -154,7 +154,7 @@ x_in = tlx.convert_to_tensor([[1., 2., 3.]])
 target = tlx.convert_to_tensor([[1., 0.]])
 
 print("Before optimization, network layer 1's weights is: \n{}".format(
-    MLP.layer_list[0].weights.numpy()))
+    MLP.layer_list[0].weights.detach().numpy()))
 
 out = MLP(x_in)
 l_bce = tlx.losses.binary_cross_entropy(out, target)
@@ -162,6 +162,6 @@ l_bce = tlx.losses.binary_cross_entropy(out, target)
 grads = opt.gradient(l_bce, MLP.trainable_weights)
 opt.apply_gradients(zip(grads, MLP.trainable_weights))
 print("After optimization, network layer 1's weights is: \n{}".format(
-    MLP.layer_list[0].weights.numpy()))
+    MLP.layer_list[0].weights.detach().numpy()))
 
 
