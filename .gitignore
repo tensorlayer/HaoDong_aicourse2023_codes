@@ -1,0 +1,6 @@
+*.pyc
+data/
+fra.txt
+vocab.txt
+*.h5
+*.rar
