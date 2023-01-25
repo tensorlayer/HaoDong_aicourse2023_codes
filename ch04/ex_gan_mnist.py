@@ -14,6 +14,11 @@ from tensorlayerx.nn import Module, Linear
 from tensorlayerx.dataflow import Dataset
 from tensorlayerx.model import TrainOneStep
 
+import torch
+# device = torch.device('mlu:0' if torch.mlu.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+
 X_train, y_train, X_val, y_val, X_test, y_test = tlx.files.load_mnist_dataset(shape=(-1, 784))
 
 
@@ -81,7 +86,7 @@ class WithLossG(Module):
     def forward(self, g_data, label):
         fake_image = self.g_net(g_data)
         logits_fake = self.d_net(fake_image)
-        valid = tlx.convert_to_tensor(np.ones(logits_fake.shape), dtype=tlx.float32)
+        valid = tlx.convert_to_tensor(np.ones(logits_fake.shape), dtype=tlx.float32).to(logits_fake.device)
         loss = self.loss_fn(logits_fake, valid)
         return loss
 
@@ -99,8 +104,8 @@ class WithLossD(Module):
         fake_image = self.g_net(g_data)
         logits_fake = self.d_net(fake_image)
 
-        valid = tlx.convert_to_tensor(np.ones(logits_real.shape), dtype=tlx.float32)
-        fake = tlx.convert_to_tensor(np.zeros(logits_fake.shape), dtype=tlx.float32)
+        valid = tlx.convert_to_tensor(np.ones(logits_real.shape), dtype=tlx.float32).to(logits_real.device)
+        fake = tlx.convert_to_tensor(np.zeros(logits_fake.shape), dtype=tlx.float32).to(logits_real.device)
 
         loss = self.loss_fn(logits_real, valid) + self.loss_fn(logits_fake, fake)
         return loss
@@ -114,8 +119,8 @@ optimizer_d = tlx.optimizers.Adam(lr=3e-4)
 
 g_weights = G.trainable_weights
 d_weights = D.trainable_weights
-net_with_loss_G = WithLossG(G, D, loss_fn)
-net_with_loss_D = WithLossD(G, D, loss_fn)
+net_with_loss_G = WithLossG(G.to(device), D.to(device), loss_fn).to(device)
+net_with_loss_D = WithLossD(G.to(device), D.to(device), loss_fn).to(device)
 train_one_step_g = TrainOneStep(net_with_loss_G, optimizer_g, g_weights)
 train_one_step_d = TrainOneStep(net_with_loss_D, optimizer_d, d_weights)
 n_epoch = 50
@@ -138,8 +143,8 @@ for epoch in range(n_epoch):
     for data, label in train_loader:
         noise = tlx.convert_to_tensor(np.random.random(size=(batch_size, 100)), dtype=tlx.float32)
 
-        _loss_d = train_one_step_d(data, noise)
-        _loss_g = train_one_step_g(noise, label)
+        _loss_d = train_one_step_d(data.to(device), noise.to(device))
+        _loss_g = train_one_step_g(noise.to(device), label.to(device))
         d_loss += _loss_d
         g_loss += _loss_g
 
@@ -147,5 +152,5 @@ for epoch in range(n_epoch):
         print("Epoch {} of {} took {}".format(epoch + 1, n_epoch, time.time() - start_time))
         print("   d loss: {}".format(d_loss / n_iter))
         print("   g loss:  {}".format(g_loss / n_iter))
-    fake_image = G(tlx.convert_to_tensor(np.random.random(size=(36, 100)), dtype=tlx.float32))
+    fake_image = G(tlx.convert_to_tensor(np.random.random(size=(36, 100)), dtype=tlx.float32).to(device))
     plot_fake_image(fake_image, 36)

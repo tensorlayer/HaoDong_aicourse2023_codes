@@ -6,3 +6,5 @@ vocab.txt
 *.rar
 ch03/unet_model.npz
 TLXZoo/
+ch03/convert_npz.py
+ch05/ptb_lstm_weights.npz
