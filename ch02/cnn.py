@@ -16,15 +16,15 @@ print("Input vector: {}".format(x.flatten().tolist()))
 print("Convolution filter: {}".format(w.flatten().tolist()))
 print("Result: {}".format(out.flatten().tolist()))
 
-# VGG16 调用TLXZoo中的VGG16模型
-from tlxzoo.module import VGG
-image=tlx.convert_to_tensor(tlx.ones(shape=[1, 32, 32, 3]))
+# VGG16
+from vgg import VGG16
+image=tlx.convert_to_tensor(tlx.ones(shape=[1, 224, 224, 3]))
 
 # 完整的VGG16模型，包含最后的全连接层，直接用于分类
-model_entire = VGG(layer_type="vgg16",end_with="fc1_relu", num_labels=10)
+model_entire = VGG16(end_with="outputs",name="entire")
 
-y=model_entire(image)
+y_out=model_entire(image)
 
-# VGG16模型，只包含卷积层，用于特征提取
-# model_feature = VGG(layer_type="vgg16",end_with="pool5",name="feature")
-# y=model_feature(image)
+# VGG16模型，只包含卷积层和池化层，用于特征提取
+model_feature = VGG16(end_with="pool5",name="feature")
+y_feature=model_feature(image)

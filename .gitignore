@@ -4,7 +4,7 @@ fra.txt
 vocab.txt
 *.h5
 *.rar
-ch03/unet_model.npz
 TLXZoo/
 ch03/convert_npz.py
 ch05/ptb_lstm_weights.npz
+ch03/unet_model_tf.npz
